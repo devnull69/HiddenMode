@@ -1,9 +1,12 @@
 var enabled = false;
 var startTime = 0;
+var endTime = 0;
 
-chrome.browserAction.onClicked.addListener(function(tab) {
+function checkEnabled() {
+   console.log("checkEnabled");
    if(enabled) {
-      var endTime = (new Date()).getTime();
+      console.log("true");
+      endTime = (new Date()).getTime();
       
       chrome.history.search({
          text : "",
@@ -11,23 +14,53 @@ chrome.browserAction.onClicked.addListener(function(tab) {
          endTime : endTime,
          maxResults : 100
       }, function(items) {
-         console.log(items[0].url);
+         var count = items.length;
+         var results = [];
+         var loops = 0;
+         for(i=0; i<count; i++) {
+            chrome.history.search({text : items[i].url}, (function(_currentIndex) {
+               return function(foundVisits) {
+                  loops++;
+                  if(foundVisits.length > 1) {
+                     console.log("URL " + items[_currentIndex].url + " has " + foundVisits.length + " visits. Will not be deleted from history.");
+                  }
+                  items[_currentIndex].visits = foundVisits.length;
+                  if(loops == count)
+                     chrome.runtime.sendMessage({messageType: "visits", items: items});
+                     console.log("Message sent to popup");
+               };
+            })(i));
+         }
       });
       
-      // delete recent history
-      chrome.history.deleteRange({
-         startTime : startTime,
-         endTime : endTime
-      }, function() {
-         console.log("Recent history deleted successfully");
-      });
-      
-		chrome.browserAction.setIcon({path: "icon19disabled.png"});
-      enabled = false;
-      startTime = 0;
 	} else  {
+      console.log("false");
       startTime = (new Date()).getTime();
-		chrome.browserAction.setIcon({path: "icon19enabled.png"});
-      enabled = true;
 	}
-});
+   return enabled;
+}
+
+function setEnabled() {
+   console.log("setEnabled");
+   enabled = true;
+   chrome.browserAction.setIcon({path: "icon19enabled.png"});
+}
+
+function setDisabled() {
+   console.log("setDisabled");
+   enabled = false;
+   startTime = 0;
+   endTime = 0;
+	chrome.browserAction.setIcon({path: "icon19disabled.png"});
+}
+
+function deleteHistory() {
+   console.log("deleteHistory");
+   // delete recent history
+   chrome.history.deleteRange({
+      startTime : startTime,
+      endTime : endTime
+   }, function() {
+      console.log("Recent history deleted successfully");
+   });
+}

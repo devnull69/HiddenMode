@@ -5,9 +5,10 @@
    },
    "browser_action": {
       "default_icon": "icon19disabled.png",
-      "default_title": "Mode timer"
+      "default_title": "Hidden Mode",
+      "default_popup": "popup.html"
    },
-   "description": "Start/end hidden mode to delete history",
+   "description": "Start/end hidden mode to delete recorded history items.",
    "icons": {
       "128": "icon128.png",
       "19": "icon19enabled.png",
@@ -17,5 +18,5 @@
    "manifest_version": 2,
    "name": "Hidden mode",
    "permissions": [ "history" ],
-   "version": "1.0.0"
+   "version": "1.1.0"
 }
